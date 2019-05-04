@@ -59,12 +59,14 @@ function Main() {
 	# Change memory limits
 	echo "* soft memlock unlimited" >> /etc/security/limits.conf
 	echo "* hard memlock unlimited" >> /etc/security/limits.conf
+	hpcx_ver=""
+	source /etc/os-release
 	case $DISTRO in
 		redhat_7|centos_7)
 			# install required packages regardless VM types.
 			LogMsg "Starting RHEL/CentOS setup"
 			LogMsg "Installing required packages ..."
-			install_package "kernel-devel-$(uname -r) python-devel valgrind-devel redhat-rpm-config rpm-build gcc-gfortran libdb-devel gcc-c++ glibc-devel zlib-devel numactl-devel libmnl-devel binutils-devel iptables-devel libstdc++-devel libselinux-devel elfutils-devel libtool libnl3-devel java libstdc++.i686 dapl python-setuptools gtk2 atk cairo tcl tk createrepo byacc.x86_64 net-tools"
+			install_package "kernel-devel-$(uname -r) python-devel valgrind-devel redhat-rpm-config rpm-build gcc gcc-gfortran libdb-devel gcc-c++ glibc-devel zlib-devel numactl-devel libmnl-devel binutils-devel iptables-devel libstdc++-devel libselinux-devel elfutils-devel libtool libnl3-devel java libstdc++.i686 dapl python-setuptools gtk2 atk cairo tcl tk createrepo byacc.x86_64 net-tools"
 			# libibverbs-devel and libibmad-devel have broken dependecies on Centos 7.6
 			# Switching to direct install instead of using the function
 			yum install -y libibverbs-devel libibmad-devel
@@ -84,6 +86,7 @@ function Main() {
 			# because we have seen some inconsistencies in getting the exact OS version.
 			distro_version=$(sed 's/[^.0-9]//g' /etc/redhat-release)
 			distro_version=$(echo ${distro_version:0:3})
+			hpcx_ver="redhat"+$VERSION_ID
 			mlx5_ofed_link="$mlx_ofed_partial_link$distro_version-x86_64.tgz"
 			cd
 			LogMsg "Downloading MLX driver"
@@ -142,6 +145,7 @@ function Main() {
 			zypper --non-interactive in libibmad-devel
 			# Enable mlx5_ib module on boot
 			echo "mlx5_ib" >> /etc/modules-load.d/mlx5_ib.conf
+			hpcx_ver="suse"+$VERSION_ID
 			;;
 		ubuntu*)
 			LogMsg "This is Ubuntu"
@@ -151,6 +155,7 @@ function Main() {
 				SetTestStateFailed
 				exit 0
 			fi
+			hpcx_ver="ubuntu"+$VERSION_ID
 			LogMsg "Installing required packages ..."
 			install_package "build-essential python-setuptools libibverbs-dev bison flex ibverbs-utils net-tools"
 			;;
@@ -308,6 +313,29 @@ function Main() {
 		# file validation
 		Verify_File $target_bin
 		LogMsg "Completed Open MPI installation"
+	elif [ $mpi_type == "hpcx" ]; then
+		# HPC-X MPI installation
+		LogMsg "HPC-X MPI installation running ..."
+		LogMsg "Downloading the target hpcx binary tbz, $hpcx_mpi$hpcx_ver-x86_64.tbz"
+		wget $hpcx_mpi$hpcx_ver-x86_64.tbz
+		Verify_Result
+
+		tar xvf $hpcx_mpi$hpcx_ver-x86_64.tbz
+		cd $hpcx_mpi$hpcx_ver-x86_64
+		export HPCX_HOME=$PWD
+
+		LogMsg "Loading HPC-X initial values"
+		source $HPCX_HOME/hpcx-init.sh
+		Verify_Result
+
+		LogMsg "Loading HPC-X binaries"
+		hpcx_load
+		Verify_Result
+
+		LogMsg "Displaying env variales"
+		env | grep HPCX
+		Verify_Result
+		LogMsg "Completed HPC-X MPI loading"
 	else
 		# MVAPICH MPI installation
 		LogMsg "MVAPICH MPI installation running ..."
