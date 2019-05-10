@@ -86,7 +86,7 @@ function Main() {
 			# because we have seen some inconsistencies in getting the exact OS version.
 			distro_version=$(sed 's/[^.0-9]//g' /etc/redhat-release)
 			distro_version=$(echo ${distro_version:0:3})
-			hpcx_ver="redhat"+$VERSION_ID
+			hpcx_ver="redhat"$VERSION_ID
 			mlx5_ofed_link="$mlx_ofed_partial_link$distro_version-x86_64.tgz"
 			cd
 			LogMsg "Downloading MLX driver"
@@ -145,7 +145,7 @@ function Main() {
 			zypper --non-interactive in libibmad-devel
 			# Enable mlx5_ib module on boot
 			echo "mlx5_ib" >> /etc/modules-load.d/mlx5_ib.conf
-			hpcx_ver="suse"+$VERSION_ID
+			hpcx_ver="suse"$VERSION_ID
 			;;
 		ubuntu*)
 			LogMsg "This is Ubuntu"
@@ -155,7 +155,7 @@ function Main() {
 				SetTestStateFailed
 				exit 0
 			fi
-			hpcx_ver="ubuntu"+$VERSION_ID
+			hpcx_ver="ubuntu"$VERSION_ID
 			LogMsg "Installing required packages ..."
 			install_package "build-essential python-setuptools libibverbs-dev bison flex ibverbs-utils net-tools"
 			;;
@@ -320,8 +320,8 @@ function Main() {
 		wget $hpcx_mpi$hpcx_ver-x86_64.tbz
 		Verify_Result
 
-		tar xvf $hpcx_mpi$hpcx_ver-x86_64.tbz
-		cd $hpcx_mpi$hpcx_ver-x86_64
+		tar xvf $(echo $hpcx_mpi$hpcx_ver-x86_64.tbz | cut -d'/' -f8)
+		cd cd $(echo $hpcx_mpi$hpcx_ver-x86_64 | cut -d'/' -f8)
 		export HPCX_HOME=$PWD
 
 		LogMsg "Loading HPC-X initial values"
