@@ -86,7 +86,7 @@ function Main() {
 			# because we have seen some inconsistencies in getting the exact OS version.
 			distro_version=$(sed 's/[^.0-9]//g' /etc/redhat-release)
 			distro_version=$(echo ${distro_version:0:3})
-			hpcx_ver="redhat"$VERSION_ID
+			hpcx_ver="redhat"$distro_version
 			mlx5_ofed_link="$mlx_ofed_partial_link$distro_version-x86_64.tgz"
 			cd
 			LogMsg "Downloading MLX driver"
@@ -316,12 +316,12 @@ function Main() {
 	elif [ $mpi_type == "hpcx" ]; then
 		# HPC-X MPI installation
 		LogMsg "HPC-X MPI installation running ..."
-		LogMsg "Downloading the target hpcx binary tbz, $hpcx_mpi-$hpcx_ver-x86_64.tbz"
-		wget $hpcx_mpi-$hpcx_ver-x86_64.tbz
+		LogMsg "Downloading the target hpcx binary tbz, $hpcx_mpi$hpcx_ver-x86_64.tbz"
+		wget $hpcx_mpi$hpcx_ver-x86_64.tbz
 		Verify_Result
 
-		tar xvf $hpcx_mpi-$hpcx_ver-x86_64.tbz
-		cd $hpcx_mpi-$hpcx_ver-x86_64
+		tar xvf $(echo $hpcx_mpi$hpcx_ver-x86_64.tbz | cut -d'/' -f8)
+		cd $(echo $hpcx_mpi$hpcx_ver-x86_64 | cut -d'/' -f8)
 		export HPCX_HOME=$PWD
 
 		LogMsg "Loading HPC-X initial values"
