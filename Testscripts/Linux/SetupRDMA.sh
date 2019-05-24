@@ -316,12 +316,12 @@ function Main() {
 	elif [ $mpi_type == "hpcx" ]; then
 		# HPC-X MPI installation
 		LogMsg "HPC-X MPI installation running ..."
-		LogMsg "Downloading the target hpcx binary tbz, $hpcx_mpi$hpcx_ver-x86_64.tbz"
-		wget $hpcx_mpi$hpcx_ver-x86_64.tbz
+		LogMsg "Downloading the target hpcx binary tbz, $hpcx_mpi-$hpcx_ver-x86_64.tbz"
+		wget $hpcx_mpi-$hpcx_ver-x86_64.tbz
 		Verify_Result
 
-		tar xvf $(echo $hpcx_mpi$hpcx_ver-x86_64.tbz | cut -d'/' -f8)
-		cd cd $(echo $hpcx_mpi$hpcx_ver-x86_64 | cut -d'/' -f8)
+		tar xvf $hpcx_mpi-$hpcx_ver-x86_64.tbz
+		cd $hpcx_mpi-$hpcx_ver-x86_64
 		export HPCX_HOME=$PWD
 
 		LogMsg "Loading HPC-X initial values"
