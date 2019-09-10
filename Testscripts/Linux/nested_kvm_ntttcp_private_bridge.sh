@@ -112,7 +112,7 @@ Prepare_Client() {
 	Setup_Tap $CLIENT_TAP $BR_NAME
 	mac_addr1=$(generate_random_mac_addr)
 	mac_addr2=$(generate_random_mac_addr)
-	cmd="qemu-system-x86_64 -cpu host -smp $NestedCpuNum -m $NestedMemMB -hda $CLIENT_IMAGE \
+	cmd="qemu-system-x86_64 -smp $NestedCpuNum -m $NestedMemMB -hda $DestinationImagePath/$CLIENT_IMAGE \
 		-device $NestedNetDevice,netdev=net0,mac=$mac_addr1 -netdev user,id=net0,hostfwd=tcp::$CLIENT_HOST_FWD_PORT-:22 \
 		-device $NestedNetDevice,netdev=net1,mac=$mac_addr2,mq=on,vectors=10 \
 		-netdev tap,id=net1,ifname=$CLIENT_TAP,script=no,vhost=on,queues=4 -display none -enable-kvm -daemonize"
@@ -143,7 +143,7 @@ Prepare_Server() {
 	Setup_Tap $SERVER_TAP $BR_NAME
 	mac_addr1=$(generate_random_mac_addr)
 	mac_addr2=$(generate_random_mac_addr)
-	cmd="qemu-system-x86_64 -cpu host -smp $NestedCpuNum -m $NestedMemMB -hda $SERVER_IMAGE \
+	cmd="qemu-system-x86_64 -smp $NestedCpuNum -m $NestedMemMB -hda $DestinationImagePath/$SERVER_IMAGE \
 	    -device $NestedNetDevice,netdev=net0,mac=$mac_addr1 -netdev user,id=net0,hostfwd=tcp::$SERVER_HOST_FWD_PORT-:22 \
 	    -device $NestedNetDevice,netdev=net1,mac=$mac_addr2,mq=on,vectors=10 \
 	    -netdev tap,id=net1,ifname=$SERVER_TAP,script=no,vhost=on,queues=4 -display none -enable-kvm -daemonize"
@@ -229,8 +229,8 @@ Collect_Logs() {
 
 Update_Test_State $ICA_TESTRUNNING
 Install_KVM_Dependencies
-Download_Image_Files -destination_image_name $CLIENT_IMAGE -source_image_url $NestedImageUrl
-cp $CLIENT_IMAGE $SERVER_IMAGE
+Download_Image_Files -destination_image_name $CLIENT_IMAGE -source_image_url $NestedImageUrl -destination_image_path $DestinationImagePath
+cp $DestinationImagePath/$CLIENT_IMAGE $DestinationImagePath/$SERVER_IMAGE
 Setup_Bridge
 Prepare_Nested_VMs
 Run_Ntttcp_On_Client

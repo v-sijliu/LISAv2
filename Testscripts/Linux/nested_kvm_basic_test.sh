@@ -68,7 +68,7 @@ fi
 Test_Nested_VM()
 {
 	#Prepare command for start nested kvm
-	cmd="qemu-system-x86_64 -smp 2 -m 2048 -hda $ImageName -display none -device e1000,netdev=user.0 -netdev user,id=user.0,hostfwd=tcp::$HostFwdPort-:22 -enable-kvm -daemonize"
+	cmd="qemu-system-x86_64 -smp 2 -m 2048 -hda $DestinationImagePath/$ImageName -display none -device e1000,netdev=user.0 -netdev user,id=user.0,hostfwd=tcp::$HostFwdPort-:22 -enable-kvm -daemonize"
 	#Start nested kvm
 	Start_Nested_VM -user "$NestedUser" -passwd "$NestedUserPassword" -port "$HostFwdPort" "$cmd"
 }
@@ -76,7 +76,7 @@ Test_Nested_VM()
 
 
 Install_KVM_Dependencies
-Download_Image_Files -destination_image_name $ImageName -source_image_url "$NestedImageUrl"
+Download_Image_Files -destination_image_name $ImageName -source_image_url "$NestedImageUrl" -destination_image_path $DestinationImagePath
 
 #Prepare nested kvm
 Test_Nested_VM
